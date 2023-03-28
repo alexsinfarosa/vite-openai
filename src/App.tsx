@@ -7,21 +7,30 @@ const configuration = new Configuration({
 })
 const openai = new OpenAIApi(configuration)
 
-const completion = await openai.createChatCompletion({
-  model: 'gpt-3.5-turbo',
-  messages: [{role: 'user', content: 'Hello world'}],
-})
-
 function App() {
-  const [message, setMessage] = useState('')
-  console.log(completion.data.choices[0].message)
+  const [message, setMessage] = useState<string | undefined>('')
+
   return (
-    <div className="">
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam provident
-      hic, porro a, aperiam aut autem, reprehenderit esse sit vero corporis
-      illo? Eveniet rem, voluptas mollitia perferendis consequatur eligendi
-      aliquam!
-    </div>
+    <>
+      <form
+        onSubmit={async e => {
+          e.preventDefault()
+          const data = new FormData(e.target as HTMLFormElement)
+          const message: string = (data.get('search') ?? '') as string
+          const completion = await openai.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            messages: [{role: 'user', content: message}],
+          })
+          setMessage(completion.data.choices[0].message?.content)
+        }}
+      >
+        <label htmlFor="search">Search</label>
+        <input id="search" type="text" name="search" />
+        <button type="submit">Submit</button>
+      </form>
+
+      <pre>{message}</pre>
+    </>
   )
 }
 
